@@ -1,18 +1,51 @@
 ﻿@page "/"
-@using System.Net.Http
+@rendermode InteractiveServer
 @inject HttpClient Http
+@using BlazorBootstrap
+
 <PageTitle>Home</PageTitle>
+<Grid @ref="grid"
+      TItem="BookDetails"
+      Class="table table-hover table-bordered table-striped"
+      DataProvider="BookDetailsDataProvider"
+      AllowFiltering="true"
+      Responsive="true"
+      PageSize="5">
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+    <GridColumn TItem="BookDetails" HeaderText="Id" PropertyName="Id">
+        @context.BookId
+    </GridColumn>
+    <GridColumn TItem="BookDetails" HeaderText="Title" PropertyName="Title">
+        @context.Title
+    </GridColumn>
+    <GridColumn TItem="BookDetails" HeaderText="Pages" PropertyName="Pages">
+        @context.Pages
+    </GridColumn>
+    <GridColumn TItem="BookDetails" HeaderText="Author" PropertyName="Author">
+        @context.Author
+    </GridColumn>
+</Grid>
 
 @code {
-    private List<BookDetails> bookDetails;
+    BlazorBootstrap.Grid<BookDetails> grid = default!;
+    private List<BookDetails> bookDetails = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        bookDetails = await Http.GetFromJsonAsync<List<BookDetails>>("all-details");
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task<GridDataProviderResult<BookDetails>> BookDetailsDataProvider(GridDataProviderRequest<BookDetails> request)
+    {
+        if (bookDetails is null)
+            bookDetails = await GetBookDetails();
+
+        return await Task.FromResult(request.ApplyTo(bookDetails));
+    }
+
+    private async Task<List<BookDetails>> GetBookDetails()
+    {
+        return await Http.GetFromJsonAsync<List<BookDetails>>("all-details");
     }
 
 }
