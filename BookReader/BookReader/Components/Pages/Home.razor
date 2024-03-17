@@ -96,10 +96,10 @@
 
     private async Task OnClickRemoveBook(int bookId)
     {
-        var confirmation = await dialog.ShowAsync(
-          title: "Are you sure you want to delete this?",
-          message1: "This will delete the record. Once deleted can not be rolled back.",
-          message2: "Do you want to proceed?");
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("BookId", bookId);
+
+        bool confirmation = await dialog.ShowAsync<Delete>("Are you sure you want to delete this book?", parameters);
 
         if (confirmation)
         {
@@ -107,17 +107,12 @@
             if (response.StatusCode == HttpStatusCode.NoContent)
             {
                 ToastService.Notify(new ToastMessage(ToastType.Success, $"Book deleted successfully."));
-                Task.Delay(500);
                 await ReloadGrid();
             }
         }
         else
             ToastService.Notify(new ToastMessage(ToastType.Secondary, $"Delete action canceled."));
-    }
 
-    private async Task DeleteEmployeeAsync(BookDetails book)
-    {
-       
     }
 
     private async Task ReloadGrid()

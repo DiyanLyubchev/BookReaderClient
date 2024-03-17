@@ -1,0 +1,35 @@
+﻿@using System.Text
+@rendermode InteractiveServer
+@inject HttpClient Http
+@using BlazorBootstrap
+@using System.Net
+
+<div class="row">
+    <div class="col-5 col-md-3 text-end">Book Id :</div>
+    <div class="col-7 col-md-9">@BookId</div>
+</div>
+<div class="row">
+    <div class="col-5 col-md-3 text-end">Author :</div>
+    <div class="col-7 col-md-9">@bookDetails.Author</div>
+</div>
+<div class="row">
+    <div class="col-5 col-md-3 text-end">Pages :</div>
+    <div class="col-7 col-md-9">@bookDetails.Pages</div>
+</div>
+<div class="row">
+    <div class="col-5 col-md-3 text-end">Title :</div>
+    <div class="col-7 col-md-9">@bookDetails.Title</div>
+</div>
+
+@code {
+    private BookDetails bookDetails;
+
+    [Parameter] public int BookId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        bookDetails = Http.GetFromJsonAsync<BookDetails>($"book/{BookId}").GetAwaiter().GetResult();
+
+        base.OnInitialized();
+    }
+}
