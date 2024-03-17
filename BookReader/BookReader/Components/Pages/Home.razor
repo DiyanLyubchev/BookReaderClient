@@ -2,8 +2,13 @@
 @rendermode InteractiveServer
 @inject HttpClient Http
 @using BlazorBootstrap
-
+@using BookReader.Components.Home
 <PageTitle>Home</PageTitle>
+
+
+<div class="content mt-1 mb-1">
+    <Upload />
+</div>
 <Grid @ref="grid"
       TItem="BookDetails"
       Class="table table-hover table-bordered table-striped"

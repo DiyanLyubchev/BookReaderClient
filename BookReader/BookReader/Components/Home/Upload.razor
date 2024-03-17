@@ -1,0 +1,79 @@
+﻿@using System.Text
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
+@using BlazorBootstrap
+@using System.Net
+
+<Modal @ref="modal" title="Modal title" UseStaticBackdrop="true" CloseOnEscape="false">
+    <BodyTemplate>
+        @alertMessage
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+    </FooterTemplate>
+</Modal>
+
+<InputFile OnChange="LoadFiles" multiple />
+
+@code {
+    string alertMessage = string.Empty;
+    private long maxFileSize = 1024L * 1024L * 1024L * 2L;
+    private string AlertClass = "alert alert-info";
+    string[] allowedExtensions = { ".pdf" };
+    private Modal modal;
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        if (e.File.Size > maxFileSize)
+        {
+            alertMessage = $"File size exceeds the limit. Maximum allowed size is {maxFileSize / (1024 * 1024)} MB.";
+            await OnShowModalClick();
+            return;
+        }
+
+        if (!allowedExtensions.Contains(Path.GetExtension(e.File.Name).ToLowerInvariant()))
+        {
+            alertMessage = $"Invalid file type. Allowed file types are {string.Join(", ", allowedExtensions)}.";
+            await OnShowModalClick();
+            return;
+        }
+
+        if (e.File.ContentType == "application/pdf")
+        {
+            MemoryStream memoryStream = new();
+            await e.File.OpenReadStream(maxFileSize).CopyToAsync(memoryStream);
+            byte[] bytes = memoryStream.ToArray();
+
+            await UploadFile(Convert.ToBase64String(bytes));
+        }
+    }
+
+    private async Task UploadFile(string fileContent)
+    {
+        BookContent request = new BookContent() { Content = fileContent };
+        HttpResponseMessage response = await Http.PostAsJsonAsync<BookContent>("add-book", request);
+        string responseMessage = await response.Content?.ReadAsStringAsync();
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            alertMessage = responseMessage;
+        }
+        else
+        {
+            alertMessage = $"Not success status code: {response.StatusCode} with message: {responseMessage}";
+        }
+
+        await OnShowModalClick();
+    }
+
+    private async Task OnShowModalClick()
+    {
+        await modal?.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal?.HideAsync();
+    }
+}
