@@ -1,4 +1,4 @@
-﻿namespace BookReader.Models;
+﻿namespace BookReader.Models.Response;
 
 public class BookDetails
 {

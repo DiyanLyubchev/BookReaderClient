@@ -3,12 +3,23 @@
 @inject HttpClient Http
 @using BlazorBootstrap
 @using BookReader.Components.Home
+@using System.Text
 <PageTitle>Home</PageTitle>
 
 
 <div class="content mt-1 mb-1">
     <Upload OnFileUploaded="ReloadGrid" />
 </div>
+
+<Modal @ref="modal" title="Modal title" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.ExtraLarge">
+    <BodyTemplate>
+        <iframe src="@bookContent" style="width: 100%; height: 800px;" frameborder="0"></iframe>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" Outline="true" @onclick="OnHideModalClick">Close</Button>
+    </FooterTemplate>
+</Modal>
+ 
 <Grid @ref="grid"
       TItem="BookDetails"
       Class="table table-hover table-bordered table-striped"
@@ -31,11 +42,17 @@
     <GridColumn TItem="BookDetails" HeaderText="Author" PropertyName="Author">
         @context.Author
     </GridColumn>
+    <GridColumn TItem="BookDetails" HeaderText="Content">
+        <Button Color="ButtonColor.Info" Outline="true" @onclick="async () => await OnClickOpenContent(context.BookId)">Read Content</Button>
+    </GridColumn>
+
 </Grid>
 
 @code {
     BlazorBootstrap.Grid<BookDetails> grid = default!;
     private List<BookDetails> bookDetails = default!;
+    private Modal modal;
+    private string bookContent; 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -59,5 +76,22 @@
     {
         bookDetails = null;
         await grid.RefreshDataAsync();
+    }
+
+    private async Task OnClickOpenContent(int bookId)
+    {
+        BookContent response = await Http.GetFromJsonAsync<BookContent>($"content/{bookId}");
+
+        if (response != null)
+        {
+            bookContent = "data:application/pdf;base64," + Convert.ToBase64String(response.Content);
+            Task.Delay(500);
+            await modal?.ShowAsync();
+        }
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal?.HideAsync();
     }
 }

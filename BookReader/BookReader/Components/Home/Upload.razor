@@ -52,8 +52,8 @@
 
     private async Task UploadFile(string fileContent)
     {
-        BookContent request = new BookContent() { Content = fileContent };
-        HttpResponseMessage response = await Http.PostAsJsonAsync<BookContent>("add-book", request);
+        BookUploadRequest request = new BookUploadRequest() { Content = fileContent };
+        HttpResponseMessage response = await Http.PostAsJsonAsync<BookUploadRequest>("add-book", request);
         string responseMessage = await response.Content?.ReadAsStringAsync();
 
         if (response.StatusCode == HttpStatusCode.OK)
