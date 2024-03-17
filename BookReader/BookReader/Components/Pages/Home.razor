@@ -47,7 +47,9 @@
     <GridColumn TItem="BookDetails" HeaderText="Content">
         <Button Color="ButtonColor.Info" Outline="true" @onclick="async () => await OnClickOpenContent(context.BookId)">Read Content</Button>
     </GridColumn>
-    <GridColumn TItem="BookDetails"  HeaderText="">
+    <ConfirmDialog @ref="dialog" />
+
+    <GridColumn TItem="BookDetails" HeaderText="">
         <Button Color="ButtonColor.Danger" Outline="true" @onclick="async () => await OnClickRemoveBook(context.BookId)">Remove Book</Button>
     </GridColumn>
 </Grid>
@@ -56,6 +58,10 @@
     BlazorBootstrap.Grid<BookDetails> grid = default!;
     private List<BookDetails> bookDetails = default!;
     private Modal modal;
+
+    private ConfirmDialog dialog = default!;
+    [Inject] ToastService ToastService { get; set; } = default!;
+
     private string bookContent;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -90,12 +96,28 @@
 
     private async Task OnClickRemoveBook(int bookId)
     {
-        HttpResponseMessage response = await Http.DeleteAsync($"delete/{bookId}");
-        if (response.StatusCode == HttpStatusCode.NoContent)
+        var confirmation = await dialog.ShowAsync(
+          title: "Are you sure you want to delete this?",
+          message1: "This will delete the record. Once deleted can not be rolled back.",
+          message2: "Do you want to proceed?");
+
+        if (confirmation)
         {
-            Task.Delay(500);
-            await ReloadGrid();
+            HttpResponseMessage response = await Http.DeleteAsync($"delete/{bookId}");
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                ToastService.Notify(new ToastMessage(ToastType.Success, $"Book deleted successfully."));
+                Task.Delay(500);
+                await ReloadGrid();
+            }
         }
+        else
+            ToastService.Notify(new ToastMessage(ToastType.Secondary, $"Delete action canceled."));
+    }
+
+    private async Task DeleteEmployeeAsync(BookDetails book)
+    {
+       
     }
 
     private async Task ReloadGrid()
