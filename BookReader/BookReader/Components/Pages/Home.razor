@@ -7,7 +7,7 @@
 
 
 <div class="content mt-1 mb-1">
-    <Upload />
+    <Upload OnFileUploaded="ReloadGrid" />
 </div>
 <Grid @ref="grid"
       TItem="BookDetails"
@@ -15,7 +15,9 @@
       DataProvider="BookDetailsDataProvider"
       AllowFiltering="true"
       Responsive="true"
-      PageSize="5">
+      AllowPaging="true"
+      PageSize="4"
+      Style=" border-block-color:aqua">
 
     <GridColumn TItem="BookDetails" HeaderText="Id" PropertyName="Id">
         @context.BookId
@@ -53,4 +55,9 @@
         return await Http.GetFromJsonAsync<List<BookDetails>>("all-details");
     }
 
+    private async Task ReloadGrid()
+    {
+        bookDetails = null;
+        await grid.RefreshDataAsync();
+    }
 }

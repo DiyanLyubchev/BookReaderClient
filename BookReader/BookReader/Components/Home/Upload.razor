@@ -17,6 +17,7 @@
 <InputFile OnChange="LoadFiles" multiple />
 
 @code {
+    [Parameter] public EventCallback OnFileUploaded { get; set; }
     string alertMessage = string.Empty;
     private long maxFileSize = 1024L * 1024L * 1024L * 2L;
     private string AlertClass = "alert alert-info";
@@ -58,6 +59,7 @@
         if (response.StatusCode == HttpStatusCode.OK)
         {
             alertMessage = responseMessage;
+            await OnFileUploaded.InvokeAsync();
         }
         else
         {
