@@ -5,7 +5,9 @@
 @using BlazorBootstrap
 @using System.Net
 
-<Modal @ref="modal" title="Modal title" UseStaticBackdrop="true" CloseOnEscape="false">
+<link href="/upload-component.css" rel="stylesheet" />
+
+<Modal @ref="modal" title="@modalTitle" UseStaticBackdrop="true" CloseOnEscape="false">
     <BodyTemplate>
         @alertMessage
     </BodyTemplate>
@@ -14,14 +16,14 @@
     </FooterTemplate>
 </Modal>
 
-<InputFile OnChange="LoadFiles" multiple />
+<InputFile class="custom-input-file" OnChange="LoadFiles" multiple />
 
 @code {
-    [Parameter] public EventCallback OnFileUploaded { get; set; }
-    string alertMessage = string.Empty;
+    [Parameter] public EventCallback OnFileUploaded { get; set; } //This is for reload the grid
+    private string alertMessage = string.Empty;
+    private string modalTitle = "Successful";
     private long maxFileSize = 1024L * 1024L * 1024L * 2L;
-    private string AlertClass = "alert alert-info";
-    string[] allowedExtensions = { ".pdf" };
+    private string[] allowedExtensions = { ".pdf" };
     private Modal modal;
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
@@ -63,6 +65,7 @@
         }
         else
         {
+            modalTitle = $"Unsuccessful";
             alertMessage = $"Not success status code: {response.StatusCode} with message: {responseMessage}";
         }
 

@@ -1,0 +1,30 @@
+﻿.custom-input-file {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 8px 20px;
+    border: 2px solid #17a2b8; /* ButtonColor.Info color */
+    border-radius: 4px;
+    color: #17a2b8; /* ButtonColor.Info color */
+    font-weight: bold;
+    background-color: transparent;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .custom-input-file:hover {
+        background-color: #17a2b8; /* ButtonColor.Info color */
+        color: white;
+    }
+
+    .custom-input-file input[type="file"] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }

@@ -4,9 +4,10 @@
 @using BlazorBootstrap
 @using BookReader.Components.Home
 @using System.Text
+@using System.Net
 <PageTitle>Home</PageTitle>
 
-
+@* OnFileUploaded is a parameter for the call-back function which invokes ReloadGrid method, when pdf fail is add to database*@
 <div class="content mt-1 mb-1">
     <Upload OnFileUploaded="ReloadGrid" />
 </div>
@@ -19,7 +20,7 @@
         <Button Color="ButtonColor.Secondary" Outline="true" @onclick="OnHideModalClick">Close</Button>
     </FooterTemplate>
 </Modal>
- 
+
 <Grid @ref="grid"
       TItem="BookDetails"
       Class="table table-hover table-bordered table-striped"
@@ -29,6 +30,7 @@
       AllowPaging="true"
       PageSize="4"
       Style=" border-block-color:aqua">
+
 
     <GridColumn TItem="BookDetails" HeaderText="Id" PropertyName="Id">
         @context.BookId
@@ -45,14 +47,16 @@
     <GridColumn TItem="BookDetails" HeaderText="Content">
         <Button Color="ButtonColor.Info" Outline="true" @onclick="async () => await OnClickOpenContent(context.BookId)">Read Content</Button>
     </GridColumn>
-
+    <GridColumn TItem="BookDetails"  HeaderText="">
+        <Button Color="ButtonColor.Danger" Outline="true" @onclick="async () => await OnClickRemoveBook(context.BookId)">Remove Book</Button>
+    </GridColumn>
 </Grid>
 
 @code {
     BlazorBootstrap.Grid<BookDetails> grid = default!;
     private List<BookDetails> bookDetails = default!;
     private Modal modal;
-    private string bookContent; 
+    private string bookContent;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -72,12 +76,6 @@
         return await Http.GetFromJsonAsync<List<BookDetails>>("all-details");
     }
 
-    private async Task ReloadGrid()
-    {
-        bookDetails = null;
-        await grid.RefreshDataAsync();
-    }
-
     private async Task OnClickOpenContent(int bookId)
     {
         BookContent response = await Http.GetFromJsonAsync<BookContent>($"content/{bookId}");
@@ -88,6 +86,22 @@
             Task.Delay(500);
             await modal?.ShowAsync();
         }
+    }
+
+    private async Task OnClickRemoveBook(int bookId)
+    {
+        HttpResponseMessage response = await Http.DeleteAsync($"delete/{bookId}");
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            Task.Delay(500);
+            await ReloadGrid();
+        }
+    }
+
+    private async Task ReloadGrid()
+    {
+        bookDetails = null;
+        await grid.RefreshDataAsync();
     }
 
     private async Task OnHideModalClick()
