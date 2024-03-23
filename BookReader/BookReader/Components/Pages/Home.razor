@@ -30,7 +30,9 @@
       AllowPaging="true"
       PageSize="4"
       Style=" border-block-color:aqua">
-
+      <GridColumn TItem="BookDetails" HeaderText="Image">
+          <Image ImageBytes="@context.Picture" />
+      </GridColumn>
 
     <GridColumn TItem="BookDetails" HeaderText="Id" PropertyName="Id">
         @context.BookId

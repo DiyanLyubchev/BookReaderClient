@@ -1,0 +1,14 @@
+@using System
+
+@if (ImageBytes != null)
+{
+    <img src="@($"data:image/png;base64,{Convert.ToBase64String(ImageBytes)}")" alt="Book Image" />
+}
+else
+{
+    <span>No Image Available</span>
+}
+
+@code {
+    [Parameter] public byte[] ImageBytes { get; set; }
+}
